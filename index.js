@@ -36,7 +36,7 @@ Take care! 🙏`);
   // bot.command('/whoru')
   bot.command('help', (ctx) => ctx.reply('Try send a sticker!'))
   bot.command('developer', (ctx) => ctx.replyWithMarkdown(`I'm made by JongEun Lee. My source code is available on [github](https://github.com/yomybaby/agung-ash-telegramBot).\n\nIf you want buy 🍺 for Jong, go Outpost and find him. 🙏`));
-  bot.command('check', (ctx) => ctx.replyWithMarkdown('Please, press button on the bottom.', Telegraf.Extra.markup((markup) => {
+  bot.command('check', (ctx) => ctx.replyWithMarkdown('Please, press a button on the bottom.', Telegraf.Extra.markup((markup) => {
     return markup.resize()
     .keyboard([
       // markup.contactRequestButton('Send contact'),
@@ -67,7 +67,9 @@ Take care! 🙏`);
   })
 
   if(process.env.NODE_ENV === 'production') {
-    bot.startWebhook(process.env.SCREAT_PATH, null, process.env.PORT);
+    
+    bot.telegram.setWebhook(`${process.env.SERVER_URL}/bot${process.env.BOT_TOKEN}`);
+    bot.startWebhook(`/bot${process.env.BOT_TOKEN}`, null, process.env.PORT || 3000);
   } else {
     bot.startPolling();
   }
