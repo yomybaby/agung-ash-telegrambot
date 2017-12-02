@@ -67,7 +67,7 @@ Take care! 🙏`);
   })
 
   if(process.env.NODE_ENV === 'production') {
-    
+    bot.startWebhook(process.env.SCREAT_PATH, null, 5000);
   } else {
     bot.startPolling();
   }
