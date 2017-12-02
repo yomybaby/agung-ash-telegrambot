@@ -1,0 +1,20 @@
+{
+  "name": "Telegram bot for Agung Ash Alert",
+  "version": "1.0.0",
+  "description": "Take care! 🙏",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jong Eun Lee (@yomybaby)",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "dotenv": "^4.0.0",
+    "moment": "^2.19.3",
+    "point-in-polygon": "^1.0.1",
+    "request": "^2.83.0",
+    "request-promise-native": "^1.0.5",
+    "telegraf": "^3.17.0"
+  }
+}
