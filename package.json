@@ -1,7 +1,7 @@
 {
-  "name": "Telegram bot for Agung Ash Alert",
+  "name": "agung-ash-telegram-bot",
   "version": "1.0.0",
-  "description": "Take care! 🙏",
+  "description": "Telegram bot for Agung Ash Alert. Take care! 🙏",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
