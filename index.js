@@ -20,24 +20,27 @@ updateAshData().then(function (){
   const bot = new Telegraf(process.env.BOT_TOKEN)
   bot.start((ctx) => {
     console.log('started:', ctx.from.id)
-    ctx.replyWithMarkdown('Welcome!👐\nI am Agung Ash Bot for your safety.\nI will let you know wether you are in ash area or not based on ash prediction data from [bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml). *I\'m not sure the result from me is always correct. Please check original source.*\n\nTake care! 🙏');
-    ctx.replyWithMarkdown('Avaliable commands:\n/check\n/help\n/WHORU?');
-    return ctx.replyWithMarkdown('Hey there! Please let\n*asdaf*', Telegraf.Extra.markup((markup) => {
+    ctx.replyWithMarkdown(
+`Welcome!👐
+I am Agung Ash Bot for your safety.
+I will let you know wether you are in ash area or not based on ash prediction data from [bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml). *I'm not sure the result from me is correct. Please check again* [original source](http://www.bom.gov.au/products/IDD65300.shtml).
+
+Take care! 🙏`);
+    return ctx.replyWithMarkdown('Avaliable commands:\n/check\nCheck current location ash state.\n\n/developer\nAre you developer, please make this bot together', Telegraf.Extra.markup((markup) => {
       return markup.resize()
       .keyboard([
-        // markup.contactRequestButton('Send contact'),
-        markup.locationRequestButton('Check my location safe or not')
+        markup.locationRequestButton('📍 Check my location 😷 or 😃')
       ])
     }));
   })
   // bot.command('/whoru')
   bot.command('help', (ctx) => ctx.reply('Try send a sticker!'))
-  bot.command('developer', (ctx) => ctx.replyWithMarkdown(`I'm made by JongEun Lee. My source code is available on [github](https://github.com/yomybaby/agung-ash-telegramBot).\n\nIf you want give 🍺 for Jong, go Outpost and find him. 🙏`));
-  bot.command('check', (ctx) => ctx.replyWithMarkdown('Hey there! Please let\n*asdaf*', Telegraf.Extra.markup((markup) => {
+  bot.command('developer', (ctx) => ctx.replyWithMarkdown(`I'm made by JongEun Lee. My source code is available on [github](https://github.com/yomybaby/agung-ash-telegramBot).\n\nIf you want buy 🍺 for Jong, go Outpost and find him. 🙏`));
+  bot.command('check', (ctx) => ctx.replyWithMarkdown('Please, press button on the bottom.', Telegraf.Extra.markup((markup) => {
     return markup.resize()
     .keyboard([
       // markup.contactRequestButton('Send contact'),
-      markup.locationRequestButton('Check my location safe or not')
+      markup.locationRequestButton('📍 Check my location 😷 or 😃')
     ])
     // .oneTime()
   }))
@@ -49,11 +52,12 @@ updateAshData().then(function (){
     
     const currentLocation = [location.latitude, location.longitude];
     
-    let message = ''
+    let message = '*Your Location Ash Prediction*\n'
     latestAshData.forEach(function (data) {
-      message+=`${data.hours?('+'+data.hours+'h'):'current'} : ${
+      // message+=`${data.hours?('+'+data.hours+'h'):'current'} : ${
+      message+=`${
         inside( currentLocation, data.pointers )?'😷':'😃'
-      }\n`
+      } ${updatedMoment.clone().add(data.hours,'h').format('HH:mma DD/MM')}\n`
     })
     message +=`\nsource from [bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml) at ${updatedMoment.format('LLL')}`
     
