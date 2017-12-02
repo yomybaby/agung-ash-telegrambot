@@ -21,6 +21,7 @@ updateAshData().then(function (){
   bot.start((ctx) => {
     console.log('started:', ctx.from.id)
     ctx.replyWithMarkdown('Welcome!👐\nI am Agung Ash Bot for your safety.\nI will let you know wether you are in ash area or not based on ash prediction data from [bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml). *I\'m not sure the result from me is always correct. Please check original source.*\n\nTake care! 🙏');
+    ctx.replyWithMarkdown('Avaliable commands:\n/check\n/help\n/WHORU?');
     return ctx.replyWithMarkdown('Hey there! Please let\n*asdaf*', Telegraf.Extra.markup((markup) => {
       return markup.resize()
       .keyboard([
@@ -29,8 +30,10 @@ updateAshData().then(function (){
       ])
     }));
   })
+  // bot.command('/whoru')
   bot.command('help', (ctx) => ctx.reply('Try send a sticker!'))
-  bot.hears('/check', (ctx) => ctx.replyWithMarkdown('Hey there! Please let\n*asdaf*', Telegraf.Extra.markup((markup) => {
+  bot.command('developer', (ctx) => ctx.replyWithMarkdown(`I'm made by JongEun Lee. My source code is available on [github](https://github.com/yomybaby/agung-ash-telegramBot).\n\nIf you want give 🍺 for Jong, go Outpost and find him. 🙏`));
+  bot.command('check', (ctx) => ctx.replyWithMarkdown('Hey there! Please let\n*asdaf*', Telegraf.Extra.markup((markup) => {
     return markup.resize()
     .keyboard([
       // markup.contactRequestButton('Send contact'),
