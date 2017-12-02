@@ -34,7 +34,7 @@ updateAshData().then(function (){
 `Welcome!👐
 
 You can check whether your current location is in Mt. Agung's ash cloud coverage or not.
-this info is based on a data from [bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml). 
+This info is based on a data from [bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml). 
 
 Be safe and enjoy beautiful Bali! 🙏`);
     return ctx.replyWithMarkdown('Avaliable commands:\n/check\nCheck current location.\n\n/developer\nAre you a developer? please make this bot together', Telegraf.Extra.markup((markup) => {
@@ -45,7 +45,7 @@ Be safe and enjoy beautiful Bali! 🙏`);
     }));
   })
   bot.command('developer', (ctx) => ctx.replyWithMarkdown(`I'm made by JongEun Lee. My source code is available on [github](https://github.com/yomybaby/agung-ash-telegramBot).\n\nIf you want buy 🍺 for Jong, go Outpost and find him. 🙏`));
-  bot.command('check', (ctx) => ctx.replyWithMarkdown('PPlease, press "Check my location" button on the bottom to start.', Telegraf.Extra.markup((markup) => {
+  bot.command('check', (ctx) => ctx.replyWithMarkdown('Please, press "Check my location" button on the bottom to start.', Telegraf.Extra.markup((markup) => {
     return markup.resize()
     .keyboard([
       markup.locationRequestButton('📍 Check my location')
@@ -58,9 +58,9 @@ Be safe and enjoy beautiful Bali! 🙏`);
 
     const currentLocation = [location.latitude, location.longitude];
 
-    let message = `*Check this forecast for Mt. Agung's ash coverage.*\n\n`;
     
     const generatedAshInfo = generateAshInfo(currentLocation);
+    let message = `*Check this forecast for Mt. Agung's ash coverage.*\n${generatedAshInfo.emoMessage}\n\n`;
     message+=generatedAshInfo.message;
     message +=`\nYou may check it on [the ash cloud map of bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml) at ${updatedMoment.format('LT DD/MM')}\n\nMay I alert you when a new forecast comes out(every 3 hours)?`
     
@@ -216,7 +216,7 @@ function generateAshInfo(currentLocation){
     let isInside = inside( currentLocation, data.pointers );
     ashState.push(isInside);
     message+=`${
-      isInside?'inside':'outside'
+      isInside?'in':'out'
     } @ ${updatedMoment.clone().add(data.hours,'h').format('HH a Do MMM')}\n`
   });
   
