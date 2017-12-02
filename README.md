@@ -1,4 +1,4 @@
-# Aguing Ash Bot on Telegram
+# Agung Ash Bot on Telegram
 
 This is not a officail bot. This bot is developed for make easy to check your location ash state.
 
