@@ -3,20 +3,34 @@ require('dotenv').config()
 const inside = require('point-in-polygon');
 const rp = require('request-promise-native');
 const cheerio = require('cheerio')
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 let latestAshData = [];
 let updatedMoment;
+moment.tz.setDefault('Asia/Brunei'); //+08:00 Bali
+
+
+setInterval(function () {
+  console.log('updated at ' + moment().format('LLL'));
+  updateAshData();
+},5*60*1000);
 
 updateAshData().then(function (){
   const Telegraf = require('telegraf');
   const bot = new Telegraf(process.env.BOT_TOKEN)
   bot.start((ctx) => {
     console.log('started:', ctx.from.id)
-    return ctx.replyWithMarkdown('Welcome!👐\nI am Agung Ash Bot for your safety.\nI will let you know wether you are in ash area or not based on ash prediction data from [bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml). *I\'m not sure the result from me is always correct. Please check original source.*\n\nTake care! 🙏');
+    ctx.replyWithMarkdown('Welcome!👐\nI am Agung Ash Bot for your safety.\nI will let you know wether you are in ash area or not based on ash prediction data from [bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml). *I\'m not sure the result from me is always correct. Please check original source.*\n\nTake care! 🙏');
+    return ctx.replyWithMarkdown('Hey there! Please let\n*asdaf*', Telegraf.Extra.markup((markup) => {
+      return markup.resize()
+      .keyboard([
+        // markup.contactRequestButton('Send contact'),
+        markup.locationRequestButton('Check my location safe or not')
+      ])
+    }));
   })
   bot.command('help', (ctx) => ctx.reply('Try send a sticker!'))
-  bot.hears('hi', (ctx) => ctx.replyWithMarkdown('Hey there! Please let\n*asdaf*', Telegraf.Extra.markup((markup) => {
+  bot.hears('/check', (ctx) => ctx.replyWithMarkdown('Hey there! Please let\n*asdaf*', Telegraf.Extra.markup((markup) => {
     return markup.resize()
     .keyboard([
       // markup.contactRequestButton('Send contact'),
@@ -34,7 +48,7 @@ updateAshData().then(function (){
     
     let message = ''
     latestAshData.forEach(function (data) {
-      message+=`${data.hours?(data.hours+'h'):'current'} : ${
+      message+=`${data.hours?('+'+data.hours+'h'):'current'} : ${
         inside( currentLocation, data.pointers )?'😷':'😃'
       }\n`
     })
@@ -45,7 +59,11 @@ updateAshData().then(function (){
     
   })
 
-  bot.startPolling();
+  if(process.env.NODE_ENV === 'production') {
+    
+  } else {
+    bot.startPolling();
+  }
 });
 
 async function updateAshData() {
@@ -74,7 +92,7 @@ async function updateAshData() {
       }) 
     });
     
-    // console.log(JSON.stringify(ashData));
+    // console.log(JSON.st||ringify(ashData));
     
     latestAshData = ashData;
   } catch (e) {
