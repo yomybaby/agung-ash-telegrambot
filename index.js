@@ -37,7 +37,7 @@ You can check whether your current location is in Mt. Agung's ash cloud coverage
 This info is based on a data from [bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml). 
 
 Be safe and enjoy beautiful Bali! 🙏`);
-    return ctx.replyWithMarkdown('Avaliable commands:\n/check\nCheck current location.\n\n/developer\nAre you a developer? please make this bot together', Telegraf.Extra.markup((markup) => {
+    return ctx.replyWithMarkdown('Avaliable commands:\n/check : Check current location.\n\n/developer : Are you a developer? please make this bot together', Telegraf.Extra.markup((markup) => {
       return markup.resize()
       .keyboard([
         markup.locationRequestButton('📍 Check my location')
