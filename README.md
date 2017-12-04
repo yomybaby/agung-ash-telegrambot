@@ -1,10 +1,6 @@
 # Agung Ash Bot on Telegram
 
-This is not a officail bot. This bot is developed for make easy to check your location ash state.
-
+This is not a officail bot. With this bot, you can check Mt. Agung's ash cloud coverage forecast. (source: bom.gov.au)
 Be safe!
 
 ![image from Magma Indonesia](https://pbs.twimg.com/media/DPpCMVpUQAA-Ayt.jpg)
-<center>
-![screen shot](https://raw.githubusercontent.com/yomybaby/agung-ash-telegramBot/master/screenshot.jpeg)
-</center>
