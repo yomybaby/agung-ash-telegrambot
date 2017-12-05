@@ -44,7 +44,7 @@ Be safe and enjoy beautiful Bali! 🙏`);
       ])
     }));
   })
-  bot.command('developer', (ctx) => ctx.replyWithMarkdown(`I'm made by JongEun Lee. My source code is available on [github](https://github.com/yomybaby/agung-ash-telegramBot).\n\nIf you want buy 🍺 for Jong, go Outpost and find him. 🙏`));
+  bot.command('developer', (ctx) => ctx.replyWithMarkdown(`I'm made by JongEun Lee. My source code is available on [github](https://github.com/yomybaby/agung-ash-telegramBot).\n\nIf you want buy 🍺 for Jong, go Outpost Ubud and find him. 🙏`));
   bot.command('check', (ctx) => ctx.replyWithMarkdown('Please, press "Check my location" button on the bottom to start.', Telegraf.Extra.markup((markup) => {
     return markup.resize()
     .keyboard([
@@ -57,7 +57,10 @@ Be safe and enjoy beautiful Bali! 🙏`);
     const {location} = ctx.message;
 
     const currentLocation = [location.latitude, location.longitude];
-
+    
+    if( !updatedMoment || moment().diff(updatedMoment, 'days') > 3 ){
+      return ctx.replyWithMarkdown(`Wow! Currently there is no forecast. It might be no ash cloud. 🤗\nYou may check more detail on [bom.gov.au](http://www.bom.gov.au/info/vaac/advisories.shtml)`);
+    }
     
     const generatedAshInfo = generateAshInfo(currentLocation);
     let message = `*Check this forecast for Mt. Agung's ash coverage.*\n${generatedAshInfo.emoMessage}\n\n`;
@@ -129,8 +132,14 @@ async function updateAshData() {
 
     const $ = cheerio.load(htmlString);
     let preText = $('pre').html();
-
-    updatedMoment = moment(/DTG: (.*)/.exec(preText)[1], 'YYYYMMDD/HHmmZ');
+    console.log('PRE HTML : ',preText);
+    
+    const dtgs = /DTG: (.*)/.exec(preText);
+    if(!dtgs){
+      console.error('no forecast');
+      return;
+    }
+    updatedMoment = moment(dtgs[1], 'YYYYMMDD/HHmmZ');
     
     
     redis.get('dataUpdatedAt').then(function (result) {
