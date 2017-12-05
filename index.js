@@ -124,6 +124,18 @@ Be safe and enjoy beautiful Bali! 🙏`);
 
     })
   }
+  
+  bot.on('text', (ctx) => {
+    const message = _.trim(ctx.message.text).replace(/\!/g, '');
+    
+    const hoCount = _.countBy(message.split(' '), word => word.toLowerCase()==='ho')['true'];
+    if(hoCount){
+      console.log(hoCount);
+      return ctx.reply('🎤 ' + 'ho! '.repeat(hoCount+1));
+    } else {
+      return ctx.reply('🎤 Say ho!')
+    }
+  })
 });
 
 async function updateAshData() {
