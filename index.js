@@ -14,6 +14,10 @@ const bot = new Telegraf(process.env.BOT_TOKEN)
 let latestAshData = [];
 let updatedMoment;
 
+const TEXTURL = 'http://www.bom.gov.au/products/IDD41305.shtml';
+const GRAPHICURL = 'http://www.bom.gov.au/products/IDD65305.shtml';
+
+
 moment.tz.setDefault('Asia/Brunei'); //+08:00 Bali
 
 // redis.hgetall('chatList').then(function (result) {
@@ -34,7 +38,7 @@ updateAshData().then(function (){
 `Welcome!👐
 
 You can check whether your current location is in Mt. Agung's ash cloud coverage or not.
-This info is based on a data from [bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml). 
+This info is based on a data from [bom.gov.au](${GRAPHICURL}). 
 
 Be safe and enjoy beautiful Bali! 🙏`);
     return ctx.replyWithMarkdown('Avaliable commands are :\n\n/check : Check current location.\n\n/developer : Are you a developer? please make this bot together', Telegraf.Extra.markup((markup) => {
@@ -58,14 +62,16 @@ Be safe and enjoy beautiful Bali! 🙏`);
 
     const currentLocation = [location.latitude, location.longitude];
     
-    if( !updatedMoment || moment().diff(updatedMoment, 'days') > 3 ){
+    if( !updatedMoment || moment().diff(updatedMoment, 'days') > 3  || latestAshData.length === 0){
       return ctx.replyWithMarkdown(`Wow! Currently there is no forecast. It might be no ash cloud. 🤗\nYou may check more detail on [bom.gov.au](http://www.bom.gov.au/info/vaac/advisories.shtml)`);
+    } else if (latestAshData.length === 0){
+      return ctx.replyWithMarkdown(`Wow! Currently there is no forecast. It might be no ash cloud. 🤗\nYou may check more detail on [bom.gov.au](${GRAPHICURL})`);
     }
     
     const generatedAshInfo = generateAshInfo(currentLocation);
     let message = `*Check this forecast for Mt. Agung's ash coverage.*\n${generatedAshInfo.emoMessage}\n\n`;
     message+=generatedAshInfo.message;
-    message +=`\nYou may check it on [the ash cloud map of bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml) at ${updatedMoment.format('LT DD/MM')}\n\nMay I alert you when a new forecast comes out(every 3 hours)?`
+    message +=`\nYou may check it on [the ash cloud map of bom.gov.au](${GRAPHICURL}) at ${updatedMoment.format('LT DD/MM')}\n\nMay I alert you when a new forecast comes out(every 3 hours)?`
     
     const currentChatInfo = {};
     
@@ -140,11 +146,11 @@ Be safe and enjoy beautiful Bali! 🙏`);
 
 async function updateAshData() {
   try {
-    let htmlString = await rp('http://www.bom.gov.au/products/IDD41300.shtml')
+    let htmlString = await rp(TEXTURL)
 
     const $ = cheerio.load(htmlString);
     let preText = $('pre').html();
-    console.log('PRE HTML : ',preText);
+    // console.log('PRE HTML : ',preText);
     
     const dtgs = /DTG: (.*)/.exec(preText);
     if(!dtgs){
@@ -153,17 +159,16 @@ async function updateAshData() {
     }
     updatedMoment = moment(dtgs[1], 'YYYYMMDD/HHmmZ');
     
-    
     redis.get('dataUpdatedAt').then(function (result) {
       if(result !== updatedMoment.toISOString()){ // if new ash data is comming
         console.log('NEW DATA IS COMMING');
         redis.hgetall('chatList').then(function (listMap) {
           _.each(listMap, (value, chatId) => {
             let chatInfo = JSON.parse(value);
-            
+    
             if(chatInfo.location){
               const generatedAshInfo = generateAshInfo(chatInfo.location);
-              
+    
               // if(chatInfo.alertOnNew || (chatInfo.alertOnChange && !_.isEqual(generatedAshInfo.ashState, chatInfo.ashState))){
               if(chatInfo.alertOnNew){
                 let message = `*New prediction published.*\n${generatedAshInfo.emoMessage}\n\n`
@@ -171,32 +176,37 @@ async function updateAshData() {
                 bot.telegram.sendMessage(chatId, message, {
                   parse_mode: 'Markdown'
                 });
-                message +=`\nYou may check it on [the ash cloud map of bom.gov.au](http://www.bom.gov.au/products/IDD65300.shtml) at ${updatedMoment.format('LT DD/MM')}`
+                message +=`\nYou may check it on [the ash cloud map of bom.gov.au](${GRAPHICURL}) at ${updatedMoment.format('LT DD/MM')}`
               }
             }
           })
         })
       }
-      
+    
       redis.set('dataUpdatedAt',updatedMoment.toISOString());
     })
     
     
     const obsDtg = /[OBS|EST] VA DTG: (.*)/.exec(preText)[1];
     let obsData = /[OBS|EST] VA CLD: (.*)\n(.*)/.exec(preText);
-
     const ashData = [];
-    ashData.push({
-      hours : 0,
-      pointers : convert2Pointer(obsData[1] + obsData[2]) 
-    })
+    const convertedPointer = convert2Pointer(obsData[1] + obsData[2]);
+    if(convertedPointer !== 'INVALID'){
+      ashData.push({
+        hours : 0,
+        pointers : convertedPointer
+      })
+    }
 
     preText.match(/FCST VA CLD \+(\d*) HR: (.*)\n(.*)/g).forEach(function (focastStr) {
       const hours = /\+(\d*)/.exec(focastStr)[1];
-      ashData.push({
-        hours,
-        pointers : convert2Pointer(focastStr)
-      }) 
+      const convertedPointer = convert2Pointer(focastStr);
+      if(convertedPointer !== 'INVALID'){
+        ashData.push({
+          hours,
+          pointers : convert2Pointer(focastStr)
+        }) 
+      }
     });
 
     // console.log(JSON.st||ringify(ashData));
@@ -220,13 +230,18 @@ function dms2Decimal(DDMM){
 }
 
 function convert2Pointer(dataStr) {
-  return dataStr.replace(/\s\s+/g, ' ').match(/S\d*\sE\d*/g).map(function (item) {
-    let arr = item.split(' ');
-    return [
-      dms2Decimal(arr[0]),
-      dms2Decimal(arr[1]),
-    ]
-  });
+  const points = dataStr.replace(/\s\s+/g, ' ').match(/S\d*\sE\d*/g);
+  if(_.isArray(points)){
+    return points.map(function (item) {
+      let arr = item.split(' ');
+      return [
+        dms2Decimal(arr[0]),
+        dms2Decimal(arr[1]),
+      ]
+    });
+  } else {
+    return 'INVALID';
+  }
 }
 
 function generateAshInfo(currentLocation){
