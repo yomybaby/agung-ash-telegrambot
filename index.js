@@ -173,10 +173,10 @@ async function updateAshData() {
               if(chatInfo.alertOnNew){
                 let message = `*New prediction published.*\n${generatedAshInfo.emoMessage}\n\n`
                 + generatedAshInfo.message;
+                message +=`\nYou may check it on [the ash cloud map of bom.gov.au](${GRAPHICURL}) at ${updatedMoment.format('LT DD/MM')}`
                 bot.telegram.sendMessage(chatId, message, {
                   parse_mode: 'Markdown'
                 });
-                message +=`\nYou may check it on [the ash cloud map of bom.gov.au](${GRAPHICURL}) at ${updatedMoment.format('LT DD/MM')}`
               }
             }
           })
