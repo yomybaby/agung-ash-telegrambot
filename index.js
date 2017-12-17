@@ -248,14 +248,14 @@ function generateAshInfo(currentLocation){
     // message+=`${data.hours?('+'+data.hours+'h'):'current'} : ${
     let isInside = inside( currentLocation, data.pointers );
     ashState.push(isInside);
-    message+=`${
-      isInside?'in':'out'
-    } @ ${updatedMoment.clone().add(data.hours,'h').format('hh:mm a Do MMM')}\n`
+    message+=`\`${
+      isInside?'in ':'out'
+    } @ ${updatedMoment.clone().add(data.hours,'h').format('hh:mm a Do MMM')}\`\n`
   });
   
   const colors = ['0xff0000ff','0xff8c00ff','0xffff00ff','0x008000ff'];
   let googleStaticMapUrl = 'http://maps.googleapis.com/maps/api/staticmap?center=Agung&zoom=10&size=640x640&scale=2'
-  _.each(ashData, (data, index)=>{
+  _.each(latestAshData, (data, index)=>{
     googleStaticMapUrl += `&path=color:${colors[index]}|weight:${4}`;
     _.each(data.pointers,(p)=>{
       googleStaticMapUrl+=`|${p[0]},${p[1]}`;
