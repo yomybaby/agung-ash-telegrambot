@@ -71,7 +71,7 @@ Be safe and enjoy beautiful Bali! 🙏`);
     const generatedAshInfo = generateAshInfo(currentLocation);
     let message = `*Check this forecast for Mt. Agung's ash coverage.*\n${generatedAshInfo.emoMessage}\n\n`;
     message+=generatedAshInfo.message;
-    message +=`\nYou may check it on [the ash cloud map of bom.gov.au](${GRAPHICURL}) at ${updatedMoment.format('LT DD/MM')}\n\nMay I alert you when a new forecast comes out(every 3 hours)?`
+    message +=`\nYou may check it on [the the google map](${generatedAshInfo.mapUrl}) based on ${updatedMoment.format('LT DD/MM')} data.\n\nMay I alert you when a new forecast comes out?`
     
     const currentChatInfo = {};
     
@@ -171,9 +171,9 @@ async function updateAshData() {
     
               // if(chatInfo.alertOnNew || (chatInfo.alertOnChange && !_.isEqual(generatedAshInfo.ashState, chatInfo.ashState))){
               if(chatInfo.alertOnNew){
-                let message = `*New prediction published.*\n${generatedAshInfo.emoMessage}\n\n`
+                let message = `*New forecast published.*\n${generatedAshInfo.emoMessage}\n\n`
                 + generatedAshInfo.message;
-                message +=`\nYou may check it on [the ash cloud map of bom.gov.au](${GRAPHICURL}) at ${updatedMoment.format('LT DD/MM')}`
+                message +=`\nYou may check it on on [the the google map](${generatedAshInfo.mapUrl}) based on ${updatedMoment.format('LT DD/MM')} data`
                 bot.telegram.sendMessage(chatId, message, {
                   parse_mode: 'Markdown'
                 });
@@ -208,9 +208,6 @@ async function updateAshData() {
         }) 
       }
     });
-
-    // console.log(JSON.st||ringify(ashData));
-
     latestAshData = ashData;
   } catch (e) {
     console.error(e);
@@ -253,12 +250,25 @@ function generateAshInfo(currentLocation){
     ashState.push(isInside);
     message+=`${
       isInside?'in':'out'
-    } @ ${updatedMoment.clone().add(data.hours,'h').format('HH a Do MMM')}\n`
+    } @ ${updatedMoment.clone().add(data.hours,'h').format('hh:mm a Do MMM')}\n`
   });
+  
+  const colors = ['0xff0000ff','0xff8c00ff','0xffff00ff','0x008000ff'];
+  let googleStaticMapUrl = 'http://maps.googleapis.com/maps/api/staticmap?center=Agung&zoom=10&size=640x640&scale=2'
+  _.each(ashData, (data, index)=>{
+    googleStaticMapUrl += `&path=color:${colors[index]}|weight:${4}`;
+    _.each(data.pointers,(p)=>{
+      googleStaticMapUrl+=`|${p[0]},${p[1]}`;
+    });
+    googleStaticMapUrl+=`|${data.pointers[0][0]},${data.pointers[0][1]}`
+  });
+  
+  googleStaticMapUrl+=`&markers=color:red|label:U|${currentLocation.join(',')}`;
   
   return {
     ashState,
     message,
-    emoMessage : ashState.map((isInside) => isInside?'😷':'😃').join(' ')
+    emoMessage : ashState.map((isInside) => isInside?'😷':'😃').join(' '),
+    mapUrl : googleStaticMapUrl
   }
 }
